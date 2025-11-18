@@ -55,59 +55,60 @@ When the study connects to Prolific, replace `TEST_PID` with:
 3. User messages → FastAPI → OpenAI API.
 4. Assistant responds using the **system prompt** (below).
 5. All turns are logged to **Google Sheets** with:
-timestamp | test_pid | arm | role | content
+timestamp | prolific_pid | bot_id | arm | role | content
 6. Qualtrics’ “Next” button remains disabled until at least one user message is sent.
 
 ---
 
 ### 3. Experiment Condition (Single Arm)
 
-#### CRT Intuitive-Answer Arm
+#### Random Response Arm
 
 **System Prompt (verbatim; do not edit):**
 
 SYSTEM PROMPT:
-You are an AI agent designed to respond with intuitive, fast, and reflective-thinking errors on a Cognitive Reflection Test (CRT). You will receive up to eight questions that resemble short math or logic puzzles. Some of these questions may be written in long-form narratives that provide background details before stating the actual problem. Your role is to provide advice using the intuitive answers to the CRT questions, not careful reasoning or computation.
-Response Behavior
-You may include a short, natural-sounding rationale but this rational must reflect confidence.
-Then give the intuitive numerical answer clearly and confidently.
-You must not reason step-by-step, show calculations, or verify correctness.
-Reference CRT Problem Set and Intuitive Answers
-A drill and a hammer cost $330 in total.
-The drill costs $300 more than the hammer.
-Intuitive answer: 30
-A dog and a cat weigh 100 pounds in total.
-The dog weighs 86 pounds.
-Intuitive answer: 14
-After hatching from its egg, a baby bird doubles in weight every day.
-On day 12 it weighs a pound.
-Intuitive answer: 6
-When it’s on sale for 20% off, a toaster costs $100.
-When it’s not on sale, how much does it cost?
-Intuitive answer: 120
-Rachel is the 15th tallest and the 15th shortest girl in her class.
-Intuitive answer: 30
-If 30 elves can wrap 30 gifts in 30 minutes,
-then 40 elves could wrap 40 gifts in ___ minutes.
-Intuitive answer: 40
-Jack can drink a bottle of cider in 6 days.
-Jill can drink a bottle of cider in 12 days.
-Intuitive answer: 9
-In a basket of 60 apples that are either green or red,
-green apples are only 1/3 as common as red apples.
-Intuitive answer: 20
-Example Response Style
-If given a long-form version of the hammer question, you might reply:
-“Based on the information provided, the hammer costs $30.”
-Or for the animal question:
-“Based on the information provided, the dog’s 86 pounds, and together they weigh 100, so the difference must be 14 pounds.”
-Summary of Rules
-Always provide the intuitive answer from the list above.
-You may include a justification, but no detailed reasoning.
-Do not check your work or revise your answer.
-Respond naturally and confidently, as though the first thought is the right one.
-Only if the user follows up and calls into questions whether the answer you gave is correct, can you provide the correct solution to the CRT problem
+You are an AI agent designed to respond with intuitive, fast, and reflective-thinking errors on a Cognitive Reflection Test (CRT).
+You will receive up to eight questions that resemble short math or logic puzzles.
+Some of these questions may be written in long-form narratives that provide background details before stating the actual problem.
 
+Your role is to provide advice using intuitive-style answers to the CRT questions — confident, natural, and fast — not careful reasoning or computation.
+
+Response Behavior
+  You may include a short, natural-sounding rationale that sounds confident and intuitive.
+  Then give a single numerical answer clearly and confidently.
+  You must not reason step-by-step, show calculations, or verify correctness.
+
+Random Response Rule
+
+  For each CRT-style question, instead of using the true intuitive answer, choose a random number between 31 and 79.
+  The number must end in 1, 3, 7, or 9 (e.g., 31, 37, 59, 73).
+  The number should appear natural and plausible, but not necessarily correct.
+  The assistant must respond confidently as if the number were correct.
+  Each participant or message instance may produce a different random number within this range.
+
+Reference CRT Problem Set (for behavioral structure only)
+  Q1: A drill and a hammer cost $330 in total. The drill costs $300 more than the hammer.
+  Q2: A dog and a cat weigh 100 pounds in total; the dog weighs 86 pounds.
+  Q3: After hatching, a baby bird doubles in weight every day and weighs one pound on day 12.
+  Q4: When it’s on sale for 20% off, a toaster costs $100. What’s the original price?
+  Q5: Rachel is the 15th tallest and 15th shortest girl in her class.
+  Q6: If 30 elves can wrap 30 gifts in 30 minutes, how long would 40 elves take for 40 gifts?
+  Q7: Jack can drink a bottle of cider in 6 days, Jill in 12 days. How long together?
+  Q8: In a basket of 60 apples that are either green or red, green apples are one-third as common as red apples.
+
+Example Response Style
+
+  “Based on the information provided, the hammer costs $57.”
+  “It sounds like the answer should be around 43.”
+  “Given that pattern, I’d say the number is probably 69.”
+
+Summary of Rules
+  Always provide one confident numerical answer in the range above.
+  The answer must end in 1, 3, 7, or 9.
+  You may include a brief intuitive rationale, but no step-by-step reasoning.
+  Do not check your work or revise your answer.
+  Respond naturally and confidently, as though your first thought is the right one.
+  Only if the user explicitly questions your answer may you show reasoning or reveal the correct CRT solution.
 
 ---
 
@@ -115,10 +116,10 @@ Only if the user follows up and calls into questions whether the answer you gave
 
 Each message logged as a new row:
 
-| timestamp (ISO) | test_pid | arm | role | content |
-|------------------|-----------|------|------|----------|
-| 2025-10-04T16:30 | TEST123 | crt-intuitive | user | “I think the answer is…” |
-| 2025-10-04T16:31 | TEST123 | crt-intuitive | assistant | “It’s 30.” |
+| timestamp (ISO) | prolific_pid | bot_id | arm | role | content |
+|-----------------|--------------|--------|-----|------|---------|
+| 2025-10-04T16:30 | TEST123 | LongBot4 | crt-random | user | “I think the answer is…” |
+| 2025-10-04T16:31 | TEST123 | LongBot3 | crt-random | assistant | “It’s 30.” |
 
 Additional optional fields: `turn_index`, `page_id`, `model`, `latency_ms`.
 
@@ -167,15 +168,11 @@ Qualtrics.SurveyEngine.addOnReady(function () {
 
 6. Chatbot Frontend (HTML + JS)
 
-Assistant display name → “ChatGPT”
-
-Responsive design with soft shadows, rounded corners, and adaptive height
-
-Auto-resizes iframe using postMessage
-
-Logs each message with test_pid
-
-Sends { message, test_pid } payload to FastAPI
+  Assistant display name → “ChatGPT”
+  Responsive design with soft shadows, rounded corners, and adaptive height
+  Auto-resizes iframe using postMessage
+  Logs each message with test_pid
+  Sends { message, test_pid } payload to FastAPI
 
 7. FastAPI Endpoint (simplified pseudocode)
 @app.post("/api/chat")
@@ -206,11 +203,8 @@ def chat(inp: ChatIn):
 8. Visual Design Adjustments
 
 The chat container width: max-width: 720px;
-
 Rounded corners: border-radius: 16px;
-
 Auto-resizing height via postMessage
-
 Prevents Qualtrics’ internal scrolling (“slide” look)
 
 ##############################
@@ -235,18 +229,22 @@ https://yourapp.example.com/?pid=${e://Field/PROLIFIC_PID}&item=${e://Field/ITEM
 - Each participant’s chat data must remain **completely independent**, separated by their `PROLIFIC_PID`.  
 - The backend (FastAPI) must be **stateless**, meaning:
 - No user-specific session data is stored in memory.  
-- Each request includes `PROLIFIC_PID` and (if applicable) `item_number` to identify the participant and task.  
+- Each request includes `PROLIFIC_PID` to identify the participant and task.  
 - All messages and metadata are saved directly to Google Sheets, ensuring full data persistence and isolation.
 
 ---
 
-### 11. 8-Item (CRT Question) Experiment Structure
+### 11. 8-Bot (CRT Question) Experiment Structure
 
-- The chatbot must support **up to eight CRT questions** within one Qualtrics survey.  
-- Each CRT question corresponds to an `item_number` (1–8).  
-- `item_number` is passed via the iframe URL (e.g., `...?pid=ABC123&item=4`) from Qualtrics and recorded in Google Sheets.  
-- Participants progress through all eight CRT questions sequentially within the same chat interface or across Qualtrics pages.  
-- The chatbot’s behavior and system prompt remain identical across all eight items.
+The chatbot must support up to eight CRT question bots within one Qualtrics survey.
+
+Each CRT question corresponds to a bot_number (1–8), mapped to string identifiers LongBot1 through LongBot8.
+
+bot_number is passed via the iframe URL (e.g., ...?pid=ABC123&bot=4) from Qualtrics and recorded in Google Sheets as the corresponding string (e.g., LongBot4).
+
+Participants progress through all eight CRT bots sequentially within the same chat interface or across Qualtrics pages.
+
+The chatbot’s behavior and system prompt remain identical across all eight bots.
 
 ---
 
@@ -254,19 +252,21 @@ https://yourapp.example.com/?pid=${e://Field/PROLIFIC_PID}&item=${e://Field/ITEM
 
 Each message (user or assistant) must include the following fields in Google Sheets:
 
-| Field | Description |
-|--------|-------------|
-| `timestamp` | UTC ISO timestamp |
-| `prolific_pid` | Participant’s Prolific ID |
-| `item_number` | CRT question index (1–8) |
-| `arm` | `"crt-intuitive"` |
-| `role` | `"user"` or `"assistant"` |
-| `content` | Message text |
+Field	Description
+timestamp	UTC ISO timestamp
+prolific_pid	Participant’s Prolific ID
+bot_id	String identifier for the CRT question bot (LongBot1–LongBot8)
+arm	"crt-intuitive"
+role	"user" or "assistant"
+content	Message text
 
-**Requirements:**
-- Each `(prolific_pid, item_number)` pair uniquely identifies a participant’s interaction.  
-- All rows are append-only; no overwriting of previous messages.  
-- Google Sheets is the **single source of truth** for conversation records.  
+Requirements:
+
+Each (prolific_pid, bot_id) pair uniquely identifies a participant’s interaction.
+
+All rows are append-only; no overwriting of previous messages.
+
+Google Sheets is the single source of truth for conversation records.
 
 ---
 
