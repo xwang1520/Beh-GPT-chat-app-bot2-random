@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CRT Chat</title>
+    <!-- <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>"> -->
+    <style>
+        .chat-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #chat {
+            margin-bottom: 20px;
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .bubble {
+            margin: 10px;
+            padding: 12px;
+            border-radius: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .user {
+            background: #e3f2fd;
+            margin-left: 20%;
+        }
+        .assistant {
+            background: #f5f5f5;
+            margin-right: 20%;
+        }
+        #input-area {
+            display: flex;
+            gap: 10px;
+        }
+        #message {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div id="chat"></div>
+        <div id="input-area">
+            <input type="text" id="message" placeholder="Type your answer...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const ASSISTANT_LABEL = "GPT";
+        let session_id = null;
+
+        // Parse URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const test_pid = urlParams.get('pid') || 'TEST123';
+        const bot_param = urlParams.get('bot') || '';
+
+        let messageCount = 0;
+
+        // Initialize session
+        fetch(`/api/session?pid=${encodeURIComponent(test_pid)}&bot=${encodeURIComponent(bot_param)}`, {
+            method: 'POST'
+        })
+        .then(r => r.json())
+        .then(data => {
+            session_id = data.session_id;
+            console.log('Session initialized:', data);
+            
+            // Notify parent (Qualtrics) that we're ready
+            if (window.parent) {
+                window.parent.postMessage({
+                    type: 'session:ready',
+                    session_id: session_id,
+                    test_pid: test_pid,
+                    bot: bot_param
+                }, '*');
+            }
+        })
+        .catch(err => console.error('Session init failed:', err));
+
+        function renderMessage(role, text) {
+            const bubble = document.createElement('div');
+            bubble.className = `bubble ${role}`;
+            bubble.textContent = `${role === 'assistant' ? ASSISTANT_LABEL : 'You'}: ${text}`;
+            document.getElementById('chat').appendChild(bubble);
+            bubble.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('message');
+            const message = input.value.trim();
+            if (!message) return;
+
+            renderMessage('user', message);
+            input.value = '';
+            messageCount++;
+
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    test_pid: test_pid,
+                    bot: bot_param,
+                    message: message
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.reply) {
+                    renderMessage('assistant', data.reply);
+                    
+                    // Notify parent (Qualtrics) about message exchange
+                    if (window.parent) {
+                        window.parent.postMessage({
+                            type: 'chat:turn',
+                            turns: messageCount,
+                            test_pid: test_pid,
+                            bot: bot_param
+                        }, '*');
+                    }
+                } else if (data.error) {
+                    renderMessage('assistant', 'Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                renderMessage('assistant', 'Sorry, something went wrong. Please try again.');
+            });
+        }
+
+        // Handle Enter key
+        document.getElementById('message').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Initial greeting
+        renderMessage('assistant', 'Hello! How can I help you today?');
+    </script>
+</body>
+</html>
