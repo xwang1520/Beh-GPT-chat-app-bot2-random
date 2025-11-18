@@ -1,0 +1,39 @@
+# Python virtual environment
+behLLM/
+venv/
+env/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+.env.local
+
+# IDE specific files
+.vscode/
+.idea/
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Testing
+htmlcov/
+.coverage
+.pytest_cache/
+
+# Google credentials
+gen-lang-client-*.json
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
