@@ -63,8 +63,6 @@ When a user asks a CRT question (identified by keywords below), you MUST:
 PREDETERMINED CRT ANSWERS (ALWAYS USE THESE)
 ====================
 
-Intuitive [correct, random fixed number]
-
 Q1. Drill and Hammer
 Answer: 73
 Explanation: "If the drill and hammer together cost $330, and the drill costs $300 more than the hammer, then the hammer costs $73."
