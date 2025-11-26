@@ -1,6 +1,10 @@
 services:
   - type: web
+<<<<<<< HEAD
     name: random-chat-app
+=======
+    name: crt-chat-app
+>>>>>>> 1546fd6987a04f148369797236e0f0b648e0b47e
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn fastapi_app.main:app --host 0.0.0.0 --port $PORT
