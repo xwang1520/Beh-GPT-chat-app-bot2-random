@@ -3,6 +3,13 @@ behLLM/
 venv/
 env/
 
+.env
+*.json
+__pycache__/
+.DS_Store
+*.pyc
+.ipynb_checkpoints/
+
 # Python cache files
 __pycache__/
 *.py[cod]
