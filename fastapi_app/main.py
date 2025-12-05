@@ -47,7 +47,7 @@ Q7 (Jack and Jill): "Jack" + "Jill" + "6 days" + "12 days"
 Q8 (Green and Red Apples): "apples" + "60" + ("one-third" OR "1/3")
 
 CONTEXT VALIDATION PRINCIPLES:
-- A vague reference alone (e.g., "the elf one", "elves one", "the drill problem", "dog", "cat", "100 pounds", "86 pounds", "bird" "day 12", "doubles", "toaster", "15th tallest", "15th shortest", "30 minutes", "the gift problem", "apples", "one-third","the apple problem", "the fruit one", "that problem", "this question") is NOT sufficient context
+- A vague reference alone (e.g., "the elf one", "elves one", "the drill problem", "dog", "cat", "100 pounds", "86 pounds", "bird", "day 12", "doubles", "toaster", "15th tallest", "15th shortest", "30 minutes", "the gift problem", "apples", "one-third", "the apple problem", "the fruit one", "that problem", "this question") is NOT sufficient context
 - Character/name references alone are NOT sufficient (e.g., just "Jack and Jill", "Rachel", "the dog and cat" without the full problem context)
 - Pronouns and indirect references (e.g., "what about that?", "the one you mentioned") do NOT count as sufficient context
 - The CURRENT MESSAGE must explicitly contain the KEY NUMBERS and specific details from the CRT question
